@@ -3,15 +3,34 @@
 var controllers = angular.module('controllers', []);
 
 controllers.controller('UploadController',['$scope', function($scope) {
-  $scope.sizeLimit      = 10585760; // 10MB in Bytes
+  $scope.sizeLimit      = 5e+8; // 10MB in Bytes
   $scope.uploadProgress = 0;
   $scope.creds          = {};
+  $scope.datas          = [];
+  AWS.config.update({ accessKeyId: "AKIAJVCEJJZ4Q36T7FXQ", secretAccessKey: "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" });
+  AWS.config.region = 'us-east-1';
+  var bucket = new AWS.S3({ params: { Bucket: "itavideo" } });
+
+  $scope.delete = function(key) {
+    bucket.deleteObject({
+      Key: key
+    }, function(err, data) {
+      if (err) console.log(err, err)
+      loadData()
+    })
+  }
+
+  const loadData = function() {
+    bucket.listObjects(function(err, data) {
+      if (err) console.log(err, err.stack);
+      else {
+        $scope.datas = data.Contents
+        $scope.$apply()
+      }
+    })
+  }
 
   $scope.upload = function() {
-    AWS.config.update({ accessKeyId: $scope.creds.access_key, secretAccessKey: $scope.creds.secret_key });
-    AWS.config.region = 'us-east-1';
-    var bucket = new AWS.S3({ params: { Bucket: $scope.creds.bucket } });
-    
     if($scope.file) {
         // Perform File Size Check First
         var fileSize = Math.round(parseInt($scope.file.size));
@@ -32,7 +51,7 @@ controllers.controller('UploadController',['$scope', function($scope) {
           else {
             // Upload Successfully Finished
             toastr.success('File Uploaded Successfully', 'Done');
-
+            loadData()
             // Reset The Progress Bar
             setTimeout(function() {
               $scope.uploadProgress = 0;
@@ -57,13 +76,10 @@ controllers.controller('UploadController',['$scope', function($scope) {
   };
 
   $scope.uniqueString = function() {
-    var text     = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for( var i=0; i < 8; i++ ) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
+    const res = new Date();
+    return res.toString();
   }
+
+  loadData()
 
 }]);
