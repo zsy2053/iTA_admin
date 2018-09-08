@@ -7,7 +7,7 @@ controllers.controller('UploadController',['$scope', function($scope) {
   $scope.uploadProgress = 0;
   $scope.creds          = {};
   $scope.datas          = [];
-  AWS.config.update({ accessKeyId: "AKIAJVCEJJZ4Q36T7FXQ", secretAccessKey: "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" });
+  AWS.config.update({ accessKeyId: "AKIAJTP3M2ZWZP42STIQ", secretAccessKey: "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" });
   AWS.config.region = 'us-east-1';
   var bucket = new AWS.S3({ params: { Bucket: "itavideo" } });
 
